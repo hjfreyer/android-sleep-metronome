@@ -1,0 +1,78 @@
+/**
+ *
+ */
+package com.hjfreyer.metronome;
+
+import android.media.AudioTrack;
+import android.util.Log;
+
+public class TickTrackGenerator implements Runnable {
+  static final String TAG = "TickTrackGenerator";
+
+  private final double startPeriod;
+  private final double endPeriod;
+  private final double durationSecs;
+
+  private final AudioTrack track;
+  private final short[] click;
+  private final int clickLen;
+
+  public TickTrackGenerator(double startPeriod,
+                            double endPeriod,
+                            double durationSecs,
+                            AudioTrack track,
+                            short[] click,
+                            int clickLen) {
+    this.startPeriod = startPeriod;
+    this.endPeriod = endPeriod;
+    this.durationSecs = durationSecs;
+    this.track = track;
+    this.click = click;
+    this.clickLen = clickLen;
+
+    // In run() we set the notification marker at the end of the
+    // stream. This does cleanup.
+    track.setPlaybackPositionUpdateListener(
+        new AudioTrack.OnPlaybackPositionUpdateListener() {
+          public void onPeriodicNotification(AudioTrack track) { }
+
+          public void onMarkerReached(AudioTrack track) {
+            Log.v(TAG, "End reached.");
+            track.stop();
+          }
+        });
+  }
+
+  public void run() {
+    Log.v(TAG, "Starting");
+
+    short[] deadSecond = new short[track.getSampleRate()];
+
+    int totalFrames = 0;
+    double elapsed = 0;
+    while (elapsed < durationSecs) {
+      track.write(click, 0, clickLen);
+      totalFrames += clickLen;
+
+      double wait = waitTime(elapsed);
+      elapsed += wait;
+
+      long gap = ((long)(wait * track.getSampleRate())) - clickLen;
+
+      while (gap > 0) {
+        int toWrite = (int) (gap < deadSecond.length ? gap : deadSecond.length);
+        track.write(deadSecond, 0, toWrite);
+        totalFrames += toWrite;
+
+        gap -= toWrite;
+      }
+    }
+    track.setNotificationMarkerPosition(totalFrames);
+    Log.v(TAG, "Done");
+  }
+
+  public double waitTime(double t) {
+    return (startPeriod * endPeriod * durationSecs) /
+        (t * (startPeriod - endPeriod) + endPeriod * durationSecs);
+  }
+}

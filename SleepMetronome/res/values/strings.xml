@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sleep Metronome</string>
+    <string name="duration">Duration (sec)</string>
+    <string name="startingFrequency">Start BPM</string>
+    <string name="endingFrequency">End BPM</string>
+    <string name="toggleText">Play it!</string>
+
+</resources>
