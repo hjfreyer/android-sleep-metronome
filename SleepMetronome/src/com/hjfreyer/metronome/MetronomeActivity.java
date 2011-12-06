@@ -88,12 +88,12 @@ public class MetronomeActivity extends Activity {
     }
 
     double duration = Double.parseDouble(durationEdit.getText().toString());
-    double startRate =
-      60.0 / Double.parseDouble(startEdit.getText().toString());
-    double endRate = 60.0 / Double.parseDouble(endEdit.getText().toString());
+    double startHz =
+      Double.parseDouble(startEdit.getText().toString()) / 60;
+    double endHz = Double.parseDouble(endEdit.getText().toString()) / 60;
 
     track.play();
-    TickTrackGenerator t = new TickTrackGenerator(startRate, endRate, duration,
+    TickTrackGenerator t = new TickTrackGenerator(startHz, endHz, duration,
                                                   track, click, clickLen);
     thread = new Thread(t);
     thread.start();

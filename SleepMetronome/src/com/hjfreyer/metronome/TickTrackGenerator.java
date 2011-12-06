@@ -19,22 +19,22 @@ import android.media.AudioTrack;
 public class TickTrackGenerator implements Runnable {
   static final String TAG = "TickTrackGenerator";
 
-  private final double startPeriod;
-  private final double endPeriod;
+  private final double startHz;
+  private final double endHz;
   private final double durationSecs;
 
   private final AudioTrack track;
   private final short[] click;
   private final int clickLen;
 
-  public TickTrackGenerator(double startPeriod,
-                            double endPeriod,
+  public TickTrackGenerator(double startHz,
+                            double endHz,
                             double durationSecs,
                             AudioTrack track,
                             short[] click,
                             int clickLen) {
-    this.startPeriod = startPeriod;
-    this.endPeriod = endPeriod;
+    this.startHz = startHz;
+    this.endHz = endHz;
     this.durationSecs = durationSecs;
     this.track = track;
     this.click = click;
@@ -57,28 +57,29 @@ public class TickTrackGenerator implements Runnable {
 
     int totalFrames = 0;
     double elapsed = 0;
+ 
     while (elapsed < durationSecs) {
-      track.write(click, 0, clickLen);
-      totalFrames += clickLen;
+      double period = 1.0 / frequency(elapsed);
+      elapsed += period;
 
-      double wait = waitTime(elapsed);
-      elapsed += wait;
+      int periodFrames = (int)(period * track.getSampleRate());
+      totalFrames += periodFrames;
+      
+      int clickFramesToWrite = Math.min(clickLen, periodFrames);
+      track.write(click, 0, clickFramesToWrite);
+      periodFrames -= clickFramesToWrite;
 
-      long gap = ((long)(wait * track.getSampleRate())) - clickLen;
-
-      while (gap > 0) {
-        int toWrite = (int) (gap < deadSecond.length ? gap : deadSecond.length);
+      while (periodFrames > 0) {
+        int toWrite = Math.min(periodFrames, deadSecond.length);
         track.write(deadSecond, 0, toWrite);
-        totalFrames += toWrite;
-
-        gap -= toWrite;
+        periodFrames -= toWrite;
       }
     }
     track.setNotificationMarkerPosition(totalFrames);
   }
 
-  public double waitTime(double t) {
-    return (startPeriod * endPeriod * durationSecs) /
-      (t * (startPeriod - endPeriod) + endPeriod * durationSecs);
+  public double frequency(double t) {
+    return (startHz * endHz * durationSecs) /
+        (t * (startHz - endHz) + endHz * durationSecs);
   }
 }
