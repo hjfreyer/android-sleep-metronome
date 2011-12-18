@@ -5,77 +5,90 @@
     android:gravity="center|top"
     android:orientation="vertical" >
 
-    <GridLayout
-        android:id="@+id/gridLayout1"
+    <TableLayout
+        android:id="@+id/tableLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="2"
-        android:orientation="horizontal">
+        android:shrinkColumns="0"
+        android:stretchColumns="1" >
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_column="0"
-            android:layout_gravity="left"
-            android:layout_row="0"
-            android:text="@string/duration"
-            android:textAppearance="?android:attr/textAppearanceLarge" android:paddingRight="20px"/>
-
-        <EditText
-            android:id="@+id/editDuration"
-            android:layout_width="0dp"
-            android:layout_column="1"
-            android:layout_gravity="fill_horizontal"
-            android:inputType="number"
-            android:scrollHorizontally="true"
-            android:singleLine="true" 
-            android:text="1800">
-
-            <requestFocus />
-        </EditText>
-
-        <TextView
-            android:id="@+id/textView1"
+        <TableRow
+            android:id="@+id/tableRow1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:text="@string/startingFrequency"
-            android:textAppearance="?android:attr/textAppearanceLarge" android:layout_column="0"/>
+            android:layout_height="wrap_content" >
 
-        <EditText
-            android:id="@+id/editStart"
-            android:layout_width="0dp"
-            android:layout_column="1"
-            android:layout_gravity="fill_horizontal"
-            android:inputType="number"
-            android:isScrollContainer="true"
-            android:text="90" />
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="20px"
+                android:text="@string/duration"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <TextView
-            android:id="@+id/textView3"
+            <EditText
+                android:id="@+id/editDuration"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="1800" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:text="@string/endingFrequency"
-            android:textAppearance="?android:attr/textAppearanceLarge" android:layout_column="0"/>
+            android:layout_height="wrap_content" >
 
-        <EditText
-            android:id="@+id/editEnd"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_column="1"
-            android:layout_gravity="fill"
-            android:inputType="number"
-	        android:text="12" />
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.10"
+                android:text="@string/startingFrequency"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    </GridLayout>
+            <EditText
+                android:id="@+id/editStart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.24"
+                android:inputType="number"
+                android:isScrollContainer="true"
+                android:text="90" >
+
+                <requestFocus />
+            </EditText>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/endingFrequency"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <EditText
+                android:id="@+id/editEnd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="12" />
+        </TableRow>
+    </TableLayout>
 
     <ToggleButton
         android:id="@+id/toggleButton1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="toggleMetro"
         android:text="ToggleButton"
-		android:textOn="@string/toggleText"
         android:textOff="@string/toggleText"
-        android:onClick="toggleMetro" />
+        android:textOn="@string/toggleText" />
 
 </LinearLayout>
