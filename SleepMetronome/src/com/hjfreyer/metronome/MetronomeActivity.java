@@ -55,6 +55,8 @@ public class MetronomeActivity extends Activity {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    ticker = new TickTrackGenerator(click, clickLen);
   }
 
   @Override
@@ -66,30 +68,29 @@ public class MetronomeActivity extends Activity {
   public void toggleMetro(View v) throws IOException, InterruptedException {
     final ToggleButton toggle = (ToggleButton) v;
     if (!toggle.isChecked()) {
-    	ticker.stop();
-    	return;
+      ticker.stop();
+      return;
     }
 
-    double duration = Double.parseDouble(durationEdit.getText().toString());
-    double startHz =
+    final double duration =
+      Double.parseDouble(durationEdit.getText().toString());
+    final double startHz =
       Double.parseDouble(startEdit.getText().toString()) / 60;
-    double endHz = Double.parseDouble(endEdit.getText().toString()) / 60;
+    final double endHz = Double.parseDouble(endEdit.getText().toString()) / 60;
 
-    ticker = new TickTrackGenerator(startHz, endHz, duration, click, clickLen);
-   
     AsyncTask<Void, Void, Void> tickTask = new AsyncTask<Void, Void, Void>() {
-		@Override
-		protected Void doInBackground(Void... params) {
-			ticker.play();
-			return null;
-		}    
-		
-		@Override
-		protected void onPostExecute(Void result) {
-			toggle.setChecked(false);
-		}
-    };
-    
+        @Override
+        protected Void doInBackground(Void... params) {
+          ticker.play(startHz, endHz, duration);
+          return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+          toggle.setChecked(false);
+        }
+      };
+
     tickTask.execute();
   }
 

@@ -78,7 +78,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:inputType="number"
-                android:text="12" />
+                android:text="30" />
         </TableRow>
     </TableLayout>
 

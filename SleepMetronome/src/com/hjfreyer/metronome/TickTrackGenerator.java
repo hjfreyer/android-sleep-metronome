@@ -22,22 +22,14 @@ public class TickTrackGenerator {
   static final String TAG = "TickTrackGenerator";
   private static final int SAMPLE_RATE = 22050;
 
-  private final double startHz;
-  private final double endHz;
-  private final double durationSecs;
-
   private final AudioTrack track;
   private final short[] click;
   private final int clickLen;
-  
-  public TickTrackGenerator(double startHz, double endHz, double durationSecs,
-		short[] click, int clickLen) {
-	this.startHz = startHz;
-	this.endHz = endHz;
-	this.durationSecs = durationSecs;
-	this.click = click;
-	this.clickLen = clickLen;
-   
+
+  public TickTrackGenerator(short[] click, int clickLen) {
+    this.click = click;
+    this.clickLen = clickLen;
+
     int bufferSize =
       AudioTrack.getMinBufferSize(SAMPLE_RATE,
                                   AudioFormat.CHANNEL_OUT_MONO,
@@ -50,20 +42,21 @@ public class TickTrackGenerator {
                            AudioTrack.MODE_STREAM);
   }
 
-  public void play() {
-	track.play();
+  public void play(double startHz, double endHz, double durationSecs) {
+    track.play();
     short[] deadSecond = new short[track.getSampleRate()];
 
     int totalFrames = 0;
     double elapsed = 0;
- 
+
     while (elapsed < durationSecs) {
-      double period = 1.0 / frequency(elapsed);
+      double period =   (elapsed * (startHz - endHz) + endHz * durationSecs) /
+        (startHz * endHz * durationSecs);
       elapsed += period;
 
       int periodFrames = (int)(period * track.getSampleRate());
       totalFrames += periodFrames;
-      
+
       int clickFramesToWrite = Math.min(clickLen, periodFrames);
       track.write(click, 0, clickFramesToWrite);
       periodFrames -= clickFramesToWrite;
@@ -75,13 +68,8 @@ public class TickTrackGenerator {
       }
     }
   }
-  
-  public void stop() {
-	  track.stop();
-  }
 
-  public double frequency(double t) {
-    return (startHz * endHz * durationSecs) /
-        (t * (startHz - endHz) + endHz * durationSecs);
+  public void stop() {
+    track.stop();
   }
 }
