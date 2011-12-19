@@ -19,9 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.app.Activity;
-import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioTrack;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -30,7 +29,6 @@ import android.widget.ToggleButton;
 public class MetronomeActivity extends Activity {
 
   private static final int CLICK_BUFFER_SIZE = 4096;
-  private static final int SAMPLE_RATE = 22050;
 
   static final String TAG = "SleepMetronome";
 
@@ -41,8 +39,7 @@ public class MetronomeActivity extends Activity {
   private short[] click;
   private int clickLen;
 
-  private Thread thread = null;
-  private AudioTrack track;
+  private TickTrackGenerator ticker;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -52,17 +49,6 @@ public class MetronomeActivity extends Activity {
     durationEdit = (EditText) findViewById(R.id.editDuration);
     startEdit = (EditText) findViewById(R.id.editStart);
     endEdit = (EditText) findViewById(R.id.editEnd);
-
-    int bufferSize =
-      AudioTrack.getMinBufferSize(SAMPLE_RATE,
-                                  AudioFormat.CHANNEL_OUT_MONO,
-                                  AudioFormat.ENCODING_PCM_16BIT);
-    track = new AudioTrack(AudioManager.STREAM_MUSIC,
-                           SAMPLE_RATE,
-                           AudioFormat.CHANNEL_OUT_MONO,
-                           AudioFormat.ENCODING_PCM_16BIT,
-                           bufferSize,
-                           AudioTrack.MODE_STREAM);
 
     try {
       initClick();
@@ -78,13 +64,10 @@ public class MetronomeActivity extends Activity {
   }
 
   public void toggleMetro(View v) throws IOException, InterruptedException {
-    ToggleButton toggle = (ToggleButton) v;
+    final ToggleButton toggle = (ToggleButton) v;
     if (!toggle.isChecked()) {
-      track.stop();
-      track.flush();
-      thread.join();
-      thread = null;
-      return;
+    	ticker.stop();
+    	return;
     }
 
     double duration = Double.parseDouble(durationEdit.getText().toString());
@@ -92,11 +75,22 @@ public class MetronomeActivity extends Activity {
       Double.parseDouble(startEdit.getText().toString()) / 60;
     double endHz = Double.parseDouble(endEdit.getText().toString()) / 60;
 
-    track.play();
-    TickTrackGenerator t = new TickTrackGenerator(startHz, endHz, duration,
-                                                  track, click, clickLen);
-    thread = new Thread(t);
-    thread.start();
+    ticker = new TickTrackGenerator(startHz, endHz, duration, click, clickLen);
+   
+    AsyncTask<Void, Void, Void> tickTask = new AsyncTask<Void, Void, Void>() {
+		@Override
+		protected Void doInBackground(Void... params) {
+			ticker.play();
+			return null;
+		}    
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			toggle.setChecked(false);
+		}
+    };
+    
+    tickTask.execute();
   }
 
   public void initClick() throws IOException {

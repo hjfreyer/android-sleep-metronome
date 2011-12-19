@@ -14,10 +14,13 @@
 
 package com.hjfreyer.metronome;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioTrack;
 
-public class TickTrackGenerator implements Runnable {
+public class TickTrackGenerator {
   static final String TAG = "TickTrackGenerator";
+  private static final int SAMPLE_RATE = 22050;
 
   private final double startHz;
   private final double endHz;
@@ -26,33 +29,29 @@ public class TickTrackGenerator implements Runnable {
   private final AudioTrack track;
   private final short[] click;
   private final int clickLen;
-
-  public TickTrackGenerator(double startHz,
-                            double endHz,
-                            double durationSecs,
-                            AudioTrack track,
-                            short[] click,
-                            int clickLen) {
-    this.startHz = startHz;
-    this.endHz = endHz;
-    this.durationSecs = durationSecs;
-    this.track = track;
-    this.click = click;
-    this.clickLen = clickLen;
-
-    // In run() we set the notification marker at the end of the
-    // stream. This does cleanup.
-    track.setPlaybackPositionUpdateListener(
-        new AudioTrack.OnPlaybackPositionUpdateListener() {
-          public void onPeriodicNotification(AudioTrack track) { }
-
-          public void onMarkerReached(AudioTrack track) {
-      	    track.stop();
-          }
-        });
+  
+  public TickTrackGenerator(double startHz, double endHz, double durationSecs,
+		short[] click, int clickLen) {
+	this.startHz = startHz;
+	this.endHz = endHz;
+	this.durationSecs = durationSecs;
+	this.click = click;
+	this.clickLen = clickLen;
+   
+    int bufferSize =
+      AudioTrack.getMinBufferSize(SAMPLE_RATE,
+                                  AudioFormat.CHANNEL_OUT_MONO,
+                                  AudioFormat.ENCODING_PCM_16BIT);
+    track = new AudioTrack(AudioManager.STREAM_MUSIC,
+                           SAMPLE_RATE,
+                           AudioFormat.CHANNEL_OUT_MONO,
+                           AudioFormat.ENCODING_PCM_16BIT,
+                           bufferSize,
+                           AudioTrack.MODE_STREAM);
   }
 
-  public void run() {
+  public void play() {
+	track.play();
     short[] deadSecond = new short[track.getSampleRate()];
 
     int totalFrames = 0;
@@ -75,7 +74,10 @@ public class TickTrackGenerator implements Runnable {
         periodFrames -= toWrite;
       }
     }
-    track.setNotificationMarkerPosition(totalFrames);
+  }
+  
+  public void stop() {
+	  track.stop();
   }
 
   public double frequency(double t) {
