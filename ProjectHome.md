@@ -1,0 +1,1 @@
+Now available free in the Android Market: https://market.android.com/details?id=com.hjfreyer.metronome
